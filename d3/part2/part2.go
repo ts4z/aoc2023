@@ -27,23 +27,24 @@ func main() {
 	// "adjacency" misnamed from part 1.  Ultimately, this represents
 	// the product of this cell if this cell happend to contain a *.
 	//
-	// We could avoid the update here if the cell did not contain a *
-	// but we're not doing that yet.
+	// We avoid doing update here if the cell did not contain a * below,
+	// so this isn't valid for the whole grid, just the interesting cells.
 	adjacency := ick.New2DArrayWithDefault[cell](len(lines), lineLen,
 		cell{count: 0, product: 1})
 
-	// Adjust a cell if the access is in bound.
+	// Adjust a cell if the access is in bound and might be interesting.
 	maybeSet := func(i, j int, number int) {
 		if i >= 0 && i < len(adjacency) &&
-			j >= 0 && j < len(adjacency[i]) {
-			log.Printf("update %d,%d? yes", i, j)
+			j >= 0 && j < len(adjacency[i]) &&
+			lines[i][j] == '*' {
+			// log.Printf("update %d,%d? yes", i, j)
 			c := &adjacency[i][j]
 			c.count++
 			c.product *= number
 
-			log.Printf("updated %d,%d: %+v\n", i, j, adjacency[i][j])
+			// log.Printf("updated %d,%d: %+v\n", i, j, adjacency[i][j])
 		} else {
-			log.Printf("update %d,%d? no, oob\n", i, j)
+			// log.Printf("update %d,%d? no, oob\n", i, j)
 		}
 	}
 
@@ -56,18 +57,10 @@ func main() {
 	for i, line := range lines {
 		working := 0
 		inNumber := false
-		firstDigitAt := -5
-
-		reset := func() {
-			working = 0
-			inNumber = false
-			firstDigitAt = -9
-		}
-
-		reset()
+		firstDigitAt := -1
 
 		finishNumber := func(nextNonDigitAt int) {
-			log.Printf("finish number at %d,%d", i, nextNonDigitAt)
+			// log.Printf("finish number at %d,%d", i, nextNonDigitAt)
 			number := working
 
 			// No need to update inside the number itself, but on the
@@ -81,26 +74,25 @@ func main() {
 				maybeSet(i+1, j, number)
 			}
 
-			reset()
+			inNumber = false
 		}
 
 		for j, ch := range line {
-			log.Printf("j=%d", j)
-			// we are either starting a number or accumulating a number
+			// log.Printf("j=%d", j)
 			if ch >= '0' && ch <= '9' {
+				// we are either starting a number or accumulating a number
 				if !inNumber {
+					// we are starting the number
 					working = 0
 					inNumber = true
 					firstDigitAt = j
-					log.Printf("j=%d now in, firstDigitAt %d", j, firstDigitAt)
-				} else {
-					log.Printf("j=%d still in, started at %d", j, firstDigitAt)
+					// log.Printf("j=%d now in, firstDigitAt %d", j, firstDigitAt)
 				}
 				working *= 10
 				working += int(ch - '0')
 			} else if inNumber {
 				// we were in a number, now we're not
-				log.Printf("j=%d now out", j)
+				// log.Printf("j=%d now out", j)
 				finishNumber(j)
 			}
 		}
@@ -118,12 +110,12 @@ func main() {
 		for j, ch := range line {
 			c := &adjacency[i][j]
 			if ch == '*' {
-				fmt.Printf("gear %d,%d\n", i, j)
+				// log.Printf("gear %d,%d\n", i, j)
 				if c.count == 2 {
-					fmt.Printf("count 2 at gear %d,%d\n", i, j)
+					// log.Printf("count 2 at gear %d,%d\n", i, j)
 					sum += c.product
 				} else {
-					fmt.Printf("count %d, not 2\n", c.count)
+					// log.Printf("count %d, not 2\n", c.count)
 				}
 			}
 		}

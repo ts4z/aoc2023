@@ -60,18 +60,15 @@ func main() {
 		firstDigitAt := -1
 
 		finishNumber := func(nextNonDigitAt int) {
-			// log.Printf("finish number at %d,%d", i, nextNonDigitAt)
-			number := working
-
 			// No need to update inside the number itself, but on the
 			// line with the number, do left and right
-			maybeSet(i, firstDigitAt-1, number)
-			maybeSet(i, nextNonDigitAt, number)
+			maybeSet(i, firstDigitAt-1, working)
+			maybeSet(i, nextNonDigitAt, working)
 			for j := firstDigitAt - 1; j < nextNonDigitAt+1; j++ {
 				// update all cells above the number
-				maybeSet(i-1, j, number)
+				maybeSet(i-1, j, working)
 				// and below the number
-				maybeSet(i+1, j, number)
+				maybeSet(i+1, j, working)
 			}
 
 			inNumber = false
@@ -86,13 +83,11 @@ func main() {
 					working = 0
 					inNumber = true
 					firstDigitAt = j
-					// log.Printf("j=%d now in, firstDigitAt %d", j, firstDigitAt)
 				}
 				working *= 10
 				working += int(ch - '0')
 			} else if inNumber {
 				// we were in a number, now we're not
-				// log.Printf("j=%d now out", j)
 				finishNumber(j)
 			}
 		}

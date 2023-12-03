@@ -37,23 +37,17 @@ func main() {
 		if i >= 0 && i < len(adjacency) &&
 			j >= 0 && j < len(adjacency[i]) &&
 			lines[i][j] == '*' {
-			// log.Printf("update %d,%d? yes", i, j)
 			c := &adjacency[i][j]
 			c.count++
 			c.product *= number
-
-			// log.Printf("updated %d,%d: %+v\n", i, j, adjacency[i][j])
-		} else {
-			// log.Printf("update %d,%d? no, oob\n", i, j)
 		}
 	}
 
-	// Walk the array looking for numbers.
-	// Numbers are horizontal.
-	// If we find one, add a count and a number to all adjacent cells.
+	// Walk the array looking for numbers.  Numbers are horizontal.  If we find
+	// one, add a count and a number to all adjacent cells.
 	//
 	// We do this left-to-right so that we handle each number once,
-	// no matter how many cells it's in.
+	// no matter how many cells it takes for the number.
 	for i, line := range lines {
 		working := 0
 		inNumber := false
@@ -97,21 +91,12 @@ func main() {
 		}
 	}
 
-	// Walk the array AGAIN, and look for gears.
-	// If a gear is found and it is adjacent to two numbers,
-	// collect the product of those numbers in the sum
 	sum := 0
 	for i, line := range lines {
-		for j, ch := range line {
+		for j := range line {
 			c := &adjacency[i][j]
-			if ch == '*' {
-				// log.Printf("gear %d,%d\n", i, j)
-				if c.count == 2 {
-					// log.Printf("count 2 at gear %d,%d\n", i, j)
-					sum += c.product
-				} else {
-					// log.Printf("count %d, not 2\n", c.count)
-				}
+			if c.count == 2 {
+				sum += c.product
 			}
 		}
 	}

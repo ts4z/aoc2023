@@ -13,7 +13,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"strconv"
 	"strings"
 	"sync"
@@ -23,7 +22,7 @@ import (
 	"github.com/ts4z/aoc2023/lpc"
 )
 
-var doShuffle = false
+const runners = 16
 
 type MapLine struct {
 	InputStart  int
@@ -208,6 +207,7 @@ func expandSeeds(in *InputFile, ch chan seedAndID) {
 		end := in.Seeds[i] + in.Seeds[i+1]
 		for j := start; j < end; j++ {
 			ch <- seedAndID{seed: j, id: id}
+			id++
 		}
 	}
 }
@@ -225,7 +225,7 @@ func searchSeeds(in *InputFile) int {
 
 	log.Printf("start children...")
 	wg := sync.WaitGroup{}
-	for i := 0; i < 16; i++ {
+	for i := 0; i < runners; i++ {
 		wg.Add(1)
 		go func(ii int) {
 			best := 9999999999999

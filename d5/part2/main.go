@@ -171,15 +171,25 @@ func searchMap(target int, m *Map) int {
 	return target
 }
 
-func search(seed int, in *InputFile) int {
-	order := []string{"seed", "soil", "fertilizer", "water",
+func precomputeLookupChain(in *InputFile) []*Map {
+	r := []*Map{}
+	var order = []string{"seed", "soil", "fertilizer", "water",
 		"light", "temperature", "humidity", "location", "SENTRY",
 	}
 
-	target := seed
 	for i := 0; order[i] != "location"; i++ {
 		m := in.Maps[fmt.Sprintf("%s-to-%s", order[i], order[i+1])]
-		target = searchMap(target, m)
+		r = append(r, m)
+	}
+
+	return r
+}
+
+func search(seed int, chain []*Map) int {
+	target := seed
+
+	for i := 0; i < len(chain); i++ {
+		target = searchMap(target, chain[i])
 		// log.Printf("new target %d", target)
 	}
 
@@ -226,6 +236,8 @@ func searchSeeds(in *InputFile) int {
 
 	bests := make(chan int, 128)
 
+	chain := precomputeLookupChain(in)
+
 	log.Printf("start children...")
 	wg := sync.WaitGroup{}
 	for i := 0; i < 16; i++ {
@@ -233,7 +245,7 @@ func searchSeeds(in *InputFile) int {
 		go func(ii int) {
 			best := 9999999999999
 			for item := range ch {
-				loc := search(item.seed, in)
+				loc := search(item.seed, chain)
 				if loc < best {
 					log.Printf("child %d found better seed %d (%d) at location %d",
 						ii, item.seed, item.id, loc)

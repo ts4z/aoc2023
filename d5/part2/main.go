@@ -196,41 +196,26 @@ func search(seed int, chain []*Map) int {
 	return target
 }
 
-func expandSeeds(in *InputFile) []int {
-	r := []int{}
-	for i := 0; i < len(in.Seeds); i += 2 {
-		start := in.Seeds[i]
-		end := in.Seeds[i] + in.Seeds[i+1]
-		for j := start; j < end; j++ {
-			r = append(r, j)
-		}
-	}
-	log.Printf("%d expanded seeds", len(r))
-	return r
-}
-
 type seedAndID struct {
 	seed int
 	id   int
 }
 
-func searchSeeds(in *InputFile) int {
-	expandedSeeds := expandSeeds(in)
-	log.Printf("%d expandedSeeds", len(expandedSeeds))
-
-	if doShuffle {
-		log.Printf("shuffle...")
-		rand.Shuffle(len(expandedSeeds), func(i, j int) {
-			expandedSeeds[i], expandedSeeds[j] = expandedSeeds[j], expandedSeeds[i]
-		})
+func expandSeeds(in *InputFile, ch chan seedAndID) {
+	id := 0
+	for i := 0; i < len(in.Seeds); i += 2 {
+		start := in.Seeds[i]
+		end := in.Seeds[i] + in.Seeds[i+1]
+		for j := start; j < end; j++ {
+			ch <- seedAndID{seed: j, id: id}
+		}
 	}
+}
 
+func searchSeeds(in *InputFile) int {
 	ch := make(chan seedAndID, 1024)
 	go func() {
-		log.Printf("writing work items to channel...")
-		for id, seed := range expandedSeeds {
-			ch <- seedAndID{seed: seed, id: id}
-		}
+		expandSeeds(in, ch)
 		close(ch)
 	}()
 

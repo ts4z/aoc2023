@@ -156,3 +156,14 @@ func New2DArrayWithDefault[T any](n, m int, def T) [][]T {
 	}
 	return a
 }
+
+// :-(
+func Min[T constraints.Ordered](ts []T) T {
+	if len(ts) == 0 {
+		panic("need at least one value to take a minimum")
+	}
+	if len(ts) == 1 {
+		return ts[0]
+	}
+	return min(ts[0], Min(ts[1:]))
+}

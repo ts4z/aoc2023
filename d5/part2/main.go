@@ -14,6 +14,8 @@ import (
 	"github.com/ts4z/aoc2023/lpc"
 )
 
+var doShuffle = false
+
 type MapLine struct {
 	InputStart  int
 	OutputStart int
@@ -188,46 +190,55 @@ func expandSeeds(in *InputFile) []int {
 	return r
 }
 
+type seedAndID struct {
+	seed int
+	id   int
+}
+
 func searchSeeds(in *InputFile) int {
 	expandedSeeds := expandSeeds(in)
 	log.Printf("%d expandedSeeds", len(expandedSeeds))
 
-	ch := make(chan int, 8)
+	if doShuffle {
+		log.Printf("shuffle...")
+		rand.Shuffle(len(expandedSeeds), func(i, j int) {
+			expandedSeeds[i], expandedSeeds[j] = expandedSeeds[j], expandedSeeds[i]
+		})
+	}
+
+	ch := make(chan seedAndID, 1024)
 	go func() {
-		for _, seed := range expandedSeeds {
-			ch <- seed
+		log.Printf("writing work items to channel...")
+		for id, seed := range expandedSeeds {
+			ch <- seedAndID{seed: seed, id: id}
 		}
 		close(ch)
 	}()
 
-	rand.Shuffle(len(expandedSeeds), func(i, j int) {
-		expandedSeeds[i], expandedSeeds[j] = expandedSeeds[j], expandedSeeds[i]
-	})
+	bests := make(chan int, 128)
 
-	bests := make(chan int, 1)
-
+	log.Printf("start children...")
 	wg := sync.WaitGroup{}
-
 	for i := 0; i < 16; i++ {
 		wg.Add(1)
 		go func(ii int) {
 			best := 9999999999999
-			for seed := range ch {
-				loc := search(seed, in)
+			for item := range ch {
+				loc := search(item.seed, in)
 				if loc < best {
-					log.Printf("child %d found better seed %d at location %d",
-						ii, seed, loc)
+					log.Printf("child %d found better seed %d (%d) at location %d",
+						ii, item.seed, item.id, loc)
 					best = loc
+					bests <- best
 				}
 			}
-			bests <- best
 			wg.Done()
 		}(i)
 	}
 
 	finalBest := make(chan int, 1)
 	go func() {
-		log.Printf("collecting spawn")
+		log.Printf("collecting bests")
 		best := <-bests
 		log.Printf("initial best %d", best)
 		for better := range bests {

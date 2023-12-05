@@ -1,5 +1,14 @@
 package main
 
+/* aoc 2023 day 5 part 2
+
+   This works but it's slow (~10 minutes).  It can probably be trivially sped
+   up with some hacks, but it's brute force.  It would be better to track
+   batches of things and pass slices around, but that means splitting when we
+   find a partial match of a range, and I lost interest because the program
+   finished running and I had my answer.
+*/
+
 import (
 	"errors"
 	"fmt"

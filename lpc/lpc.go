@@ -9,6 +9,8 @@ type LineParserContext struct {
 	currentLine int
 }
 
+// New gets ya a new one.  Load data with argv package and shove it in here.
+// Now you have a primitive way to snarf the file and print line numbers.
 func New(lines []string) *LineParserContext {
 	return &LineParserContext{
 		lines:       lines,
@@ -49,7 +51,7 @@ func (c *LineParserContext) EatBlankLine() error {
 		return nil
 	}
 	if c.Current() == "" {
-		c.currentLine++
+		c.Next()
 		return nil
 	}
 	return fmt.Errorf("line %d: expected blank line, saw %q", c.LineNumber(),

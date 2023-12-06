@@ -167,3 +167,29 @@ func Min[T constraints.Ordered](ts []T) T {
 	}
 	return min(ts[0], Min(ts[1:]))
 }
+
+// Like perl's grep.
+func Grep[T any](predicate func(T) bool, in []T) []T {
+	out := []T{}
+	for _, input := range in {
+		if predicate(input) {
+			out = append(out, input)
+		}
+	}
+	return out
+}
+
+func Not[T any](predicate func(T) bool) func(T) bool {
+	return func(t T) bool {
+		return !predicate(t)
+	}
+}
+
+func IsEmptyString(s string) bool {
+	return len(s) == 0
+}
+
+func IsEmptyArray[T any](t []T) bool {
+	// now isn't this familiar
+	return len(t) == 0
+}

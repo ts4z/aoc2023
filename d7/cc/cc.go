@@ -79,13 +79,8 @@ func CompareHands(left, right string) int {
 	for i := 0; i < 5; i++ {
 		lch := cardToOrder[left[i]]
 		rch := cardToOrder[right[i]]
-		if lch == rch {
-			continue
-		}
-		if lch < rch {
-			return -1
-		} else {
-			return 1
+		if lch != rch {
+			return lch - rch
 		}
 	}
 	log.Fatalf("can't happen, hands tied")

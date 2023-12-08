@@ -2,6 +2,7 @@ package lpc
 
 import (
 	"fmt"
+	"log"
 )
 
 type LineParserContext struct {
@@ -42,6 +43,12 @@ func (c *LineParserContext) Current() string {
 func (c *LineParserContext) Wrap(when string, err error) error {
 	return fmt.Errorf("line %d (%q) %s: %w", c.LineNumber(), c.Current(),
 		when, err)
+}
+
+func (c *LineParserContext) MustEatBlankLine() {
+	if err := c.EatBlankLine(); err != nil {
+		log.Fatalf("can't parse blank line: %v", err)
+	}
 }
 
 func (c *LineParserContext) EatBlankLine() error {

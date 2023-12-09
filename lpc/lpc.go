@@ -3,11 +3,18 @@ package lpc
 import (
 	"fmt"
 	"log"
+
+	"github.com/ts4z/aoc2023/argv"
+	"github.com/ts4z/aoc2023/ick"
 )
 
 type LineParserContext struct {
 	lines       []string
 	currentLine int
+}
+
+func Argv() *LineParserContext {
+	return New(ick.Must(argv.ReadChompAll()))
 }
 
 // New gets ya a new one.  Load data with argv package and shove it in here.

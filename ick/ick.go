@@ -122,6 +122,29 @@ func MapSlice[T, U any](fn func(T) U, ts []T) []U {
 	return us
 }
 
+// Reverse, not in place.
+func Reverse[T any](a []T) []T {
+	r := make([]T, len(a))
+	i := 0
+	j := len(a) - 1
+	for i < len(a) {
+		r[j] = a[i]
+		i++
+		j--
+	}
+	log.Printf("input %+v output %+v", a, r)
+	return r
+}
+
+// Reverse, in place.
+func NReverse[T any](a []T) {
+	ll := len(a)
+	for i, j := 0, ll-1; i < ll/2; i++ {
+		a[i], a[j] = a[j], a[i]
+		j--
+	}
+}
+
 func Keys[K comparable, V any](m map[K]V) []K {
 	r := make([]K, 0, len(m))
 	for k := range m {

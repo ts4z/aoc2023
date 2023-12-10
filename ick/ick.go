@@ -11,6 +11,7 @@ import (
 	"errors"
 	"io"
 	"log" // all kids love log
+	"math/rand"
 	"sort"
 
 	"golang.org/x/exp/constraints"
@@ -215,4 +216,10 @@ func IsEmptyString(s string) bool {
 func IsEmptyArray[T any](t []T) bool {
 	// now isn't this familiar
 	return len(t) == 0
+}
+
+func Shuffle[T any](t []T) {
+	rand.Shuffle(len(t), func(i, j int) {
+		t[i], t[j] = t[j], t[i]
+	})
 }

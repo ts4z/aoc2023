@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/ts4z/aoc2023/argv"
+	"github.com/ts4z/aoc2023/esc"
 	"github.com/ts4z/aoc2023/ick"
 )
 
@@ -298,7 +300,20 @@ func contractGrid(in *FloodFillGrid) *FloodFillGrid {
 	return out
 }
 
+type floodFillUpdate struct {
+	p         Position
+	queueSize int
+}
+
 func ProcessFloodFill(ff *FloodFillGrid) {
+	updates := make(chan floodFillUpdate, 10000)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		printFloodFillMapTripleWide(ff, updates)
+		wg.Done()
+	}()
+
 	// init
 	outside := []Position{}
 	noItIsnt := func(p Position) {
@@ -306,6 +321,7 @@ func ProcessFloodFill(ff *FloodFillGrid) {
 			// no it isn't
 			*ff.At(p) = Outside
 			outside = append(outside, p)
+			updates <- floodFillUpdate{p: p, queueSize: len(outside)}
 		}
 	}
 
@@ -314,40 +330,22 @@ func ProcessFloodFill(ff *FloodFillGrid) {
 	columns := ff.Columns()
 
 	for i := 0; i < columns; i++ {
-		noItIsnt(Position{Row: 0, Column: i})
-		noItIsnt(Position{Row: rows - 1, Column: i})
+		outside = append(outside, Position{Row: 0, Column: i})
+		outside = append(outside, Position{Row: rows - 1, Column: i})
 	}
 
 	for j := 0; j < columns-1; j++ {
-		noItIsnt(Position{Row: j, Column: 0})
-		noItIsnt(Position{Row: j, Column: columns - 1})
+		outside = append(outside, Position{Row: j, Column: 0})
+		outside = append(outside, Position{Row: j, Column: columns - 1})
 	}
 
-	fmt.Printf("\033[2J")
-
-	steps := 0
-
 	for len(outside) != 0 {
-
 		// Maybe don't do it in the obvious order?
+		// (this makes it more fun to watch)
 		if true {
 			k := rand.Intn(len(outside))
 			n := len(outside) - 1
 			outside[k], outside[n] = outside[n], outside[k]
-		}
-
-		// Add some visualization.  This is slow!  And requires a very small font
-		// on a very large monitor!
-		steps++
-		if true {
-			if steps%512 == 0 || len(outside) == 1 {
-				fmt.Printf("\033[H")
-				fmt.Printf("in queue %d         \n", len(outside))
-				printFloodFillMapTripleWide(ff)
-				if false {
-					time.Sleep(1 * time.Microsecond)
-				}
-			}
 		}
 
 		p := outside[len(outside)-1]
@@ -365,6 +363,10 @@ func ProcessFloodFill(ff *FloodFillGrid) {
 			noItIsnt(p.West())
 		}
 	}
+
+	// wait so all the updates are printed and we don't mangle the output
+	close(updates)
+	wg.Wait()
 }
 
 func printMap[T ~uint8](ff *Matrix2D[T]) {
@@ -383,7 +385,7 @@ func printFloodFillMap(ff *FloodFillGrid) int {
 	inside := 0
 	outside := 0
 	pipeline := 0
-
+	fmt.Printf("inside/outside map:\n")
 	for i := 0; i < ff.Rows(); i++ {
 		for j := 0; j < ff.Columns(); j++ {
 			at := Position{i, j}
@@ -409,18 +411,47 @@ func printFloodFillMap(ff *FloodFillGrid) int {
 	return inside
 }
 
-func printFloodFillMapTripleWide(ff *FloodFillGrid) {
+func printFloodFillMapTripleWide(ff *FloodFillGrid, outsides chan floodFillUpdate) {
 	fmt.Printf("inside/outside map:\n")
-	for i := 0; i < ff.Rows(); i++ {
-		for j := 0; j < ff.Columns(); j++ {
-			at := Position{i, j}
-			ch := ff.Get(at)
-			fmt.Printf("%c%c%c", ch, ch, ch)
+
+	esc.Clear()
+	esc.Home()
+
+	inside := 0
+	outside := 0
+
+	printFull := func() {
+		for i := 0; i < ff.Rows(); i++ {
+			for j := 0; j < ff.Columns(); j++ {
+				at := Position{i, j}
+				ch := ff.Get(at)
+				if ch == Inside {
+					inside++
+				}
+				fmt.Printf("%c%c%c", ch, ch, ch)
+			}
+			fmt.Printf("\n")
 		}
-		fmt.Printf("\n")
 	}
+
+	printFull()
+
+	for up := range outsides {
+		time.Sleep(1 * time.Millisecond)
+		esc.Home()
+		inside--
+		outside++
+		fmt.Printf("%d inside %d outside, %d in queue          ", inside, outside, up.queueSize)
+		p := up.p
+		esc.Goto(p.Row+1, 3*p.Column+1)
+		fmt.Printf("   ")
+	}
+
+	esc.Home()
+	printFull()
 }
 
+// fixStart replaces the start position with the pipe that it represents.
 func fixStart(g *PipelineGrid, start Position) {
 	north := g.Get(start.North())
 	south := g.Get(start.South())

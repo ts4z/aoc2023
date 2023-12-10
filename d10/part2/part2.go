@@ -306,11 +306,14 @@ type floodFillUpdate struct {
 }
 
 func ProcessFloodFill(ff *FloodFillGrid) {
+	esc.Home()
+	esc.Clear()
+	inside := printFullFloodFillMapTripleWide(ff)
 	updates := make(chan floodFillUpdate, 10000)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		printFloodFillMapTripleWide(ff, updates)
+		printFloodFillMapTripleWideUpdates(ff, inside, updates)
 		wg.Done()
 	}()
 
@@ -411,30 +414,24 @@ func printFloodFillMap(ff *FloodFillGrid) int {
 	return inside
 }
 
-func printFloodFillMapTripleWide(ff *FloodFillGrid, outsides chan floodFillUpdate) {
-	fmt.Printf("inside/outside map:\n")
-
-	esc.Clear()
-	esc.Home()
-
+func printFullFloodFillMapTripleWide(ff *FloodFillGrid) int {
 	inside := 0
-	outside := 0
-
-	printFull := func() {
-		for i := 0; i < ff.Rows(); i++ {
-			for j := 0; j < ff.Columns(); j++ {
-				at := Position{i, j}
-				ch := ff.Get(at)
-				if ch == Inside {
-					inside++
-				}
-				fmt.Printf("%c%c%c", ch, ch, ch)
+	for i := 0; i < ff.Rows(); i++ {
+		for j := 0; j < ff.Columns(); j++ {
+			at := Position{i, j}
+			ch := ff.Get(at)
+			if ch == Inside {
+				inside++
 			}
-			fmt.Printf("\n")
+			fmt.Printf("%c%c%c", ch, ch, ch)
 		}
+		fmt.Printf("\n")
 	}
+	return inside
+}
 
-	printFull()
+func printFloodFillMapTripleWideUpdates(ff *FloodFillGrid, inside int, outsides chan floodFillUpdate) {
+	outside := 0
 
 	for up := range outsides {
 		time.Sleep(1 * time.Millisecond)
@@ -448,7 +445,7 @@ func printFloodFillMapTripleWide(ff *FloodFillGrid, outsides chan floodFillUpdat
 	}
 
 	esc.Home()
-	printFull()
+	printFullFloodFillMapTripleWide(ff)
 }
 
 // fixStart replaces the start position with the pipe that it represents.

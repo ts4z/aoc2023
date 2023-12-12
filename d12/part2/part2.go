@@ -1,17 +1,18 @@
 package main
 
 // The initial implementation from part1 was pretty slow, so I added some
-// threads.  This was still slow, so I added caching.
+// threads.  This was still slow, so I added memoization.
 //
 // It finished almost immediately.
 //
-// Of course caching makes it faster.  It prunes all the hard states at the end
-// of the tree that we're calling recursively.
+// Of course memoizing makes it faster.  It prunes all the hard states at the
+// end of the tree that we're calling recursively.
 //
-// No attempt is made to prevent write-write cache stomping.  No attempt is made
-// to constrain the size of the cache.
+// No attempt is made to prevent write-write cache stomping.  No attempt is
+// made to constrain the size of the cache.
 //
-// I changed the code down to 1 thread and that's faster.
+// I changed the code down to 1 thread and that's faster.  (This of course
+// fixes issues with conflicts.)
 
 import (
 	"fmt"

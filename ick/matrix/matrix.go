@@ -1,5 +1,10 @@
 package matrix
 
+// Matrix presents a (potentially) convenient interface for working with an
+// array of array of slices allegedly representing a matrix.  It can do things
+// like make sure the array is properly rectangular (it doesn't) and invert the
+// matrix (it doesn't do that either).  (Maybe someday.)
+
 type Matrix[T any] struct {
 	a [][]T
 }

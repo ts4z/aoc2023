@@ -345,7 +345,7 @@ func ProcessFloodFill(ff *FloodFillGrid) {
 	for len(outside) != 0 {
 		// Maybe don't do it in the obvious order?
 		// (this makes it more fun to watch)
-		if true {
+		if false {
 			k := rand.Intn(len(outside))
 			n := len(outside) - 1
 			outside[k], outside[n] = outside[n], outside[k]

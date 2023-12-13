@@ -14,7 +14,11 @@ func (m *Matrix[T]) Rows() int {
 }
 
 func (m *Matrix[T]) Columns() int {
-	return len(m.a[0])
+	if len(m.a) > 0 {
+		return len(m.a[0])
+	} else {
+		return 0
+	}
 }
 
 func NewFrom[T any](a [][]T) *Matrix[T] {

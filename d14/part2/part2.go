@@ -113,20 +113,24 @@ func main() {
 	PrintByteMatrix(a)
 
 	const maxCycles = 1000000000
-	spinCycle := 0
+	cycleCount := 0
 	cache := map[string]int{}
 	cycleLength := -1
 
-	for {
-		spinCycle++
-
+	spinCycle := func() {
 		tiltTowardsNorth(a)
 		tiltTowardsWest(a)
 		tiltTowardsSouth(a)
 		tiltTowardsEast(a)
+	}
 
-		if spinCycle&0xFFFF == 0xFFFF {
-			fmt.Printf("at cycle %d\n", spinCycle)
+	for {
+		cycleCount++
+
+		spinCycle()
+
+		if cycleCount&0xFFFF == 0xFFFF {
+			fmt.Printf("at cycle %d\n", cycleCount)
 			PrintByteMatrix(a)
 			fmt.Printf("\n")
 		}
@@ -135,25 +139,22 @@ func main() {
 		PrintByteMatrixTo(sb, a)
 		asString := sb.String()
 		if previousCycles, ok := cache[asString]; ok {
-			fmt.Printf("cycle repeats: cycles=%d looks like %d\n", spinCycle, previousCycles)
-			cycleLength = spinCycle - previousCycles
+			fmt.Printf("cycle repeats: cycles=%d looks like %d\n", cycleCount, previousCycles)
+			cycleLength = cycleCount - previousCycles
 			fmt.Printf("cycle length is %d\n", cycleLength)
 			break
 		}
-		cache[asString] = spinCycle
+		cache[asString] = cycleCount
 	}
 
-	remaining := (maxCycles - spinCycle) % cycleLength
+	remaining := (maxCycles - cycleCount) % cycleLength
 
 	// now, we have probably seen these cycles before too, but we'll
 	// just step through until we've done the right number, it's easier
 	for remaining > 0 {
 		remaining--
 
-		tiltTowardsNorth(a)
-		tiltTowardsWest(a)
-		tiltTowardsSouth(a)
-		tiltTowardsEast(a)
+		spinCycle()
 	}
 
 	tw := 0

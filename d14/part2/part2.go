@@ -143,16 +143,12 @@ func main() {
 		cache[asString] = spinCycle
 	}
 
-	// fast-forward via the cycle length.  if we were thinking carefully, we
-	// could do this with math; or we can do it inelegantly with a for loop.
-	for spinCycle+cycleLength < maxCycles {
-		spinCycle += cycleLength
-	}
+	remaining := (maxCycles - spinCycle) % cycleLength
 
 	// now, we have probably seen these cycles before too, but we'll
-	// just step through until we've done the right number
-	for spinCycle < maxCycles {
-		spinCycle++
+	// just step through until we've done the right number, it's easier
+	for remaining > 0 {
+		remaining--
 
 		tiltTowardsNorth(a)
 		tiltTowardsWest(a)

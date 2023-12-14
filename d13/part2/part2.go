@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
+	"github.com/ts4z/aoc2023/argv"
 	"github.com/ts4z/aoc2023/ick"
 	"github.com/ts4z/aoc2023/ick/matrix"
 )
@@ -176,9 +176,11 @@ func processMatrix(m *matrix.Matrix[byte], mutatedRow, mutatedColumn int) (int, 
 }
 
 func readInput() [][]string {
-	blocks, err := ick.ReadBlankLineSeparatedBlocks(os.Stdin)
+	blocks, err := ick.ReadBlankLineSeparatedBlocks(argv.Reader(func(filename string, err error) {
+		log.Fatalf("can't read %s: %v", filename, err)
+	}))
 	if err != nil {
-		log.Fatalf("can't read: %v", err)
+		log.Fatalf("can't parse: %v", err)
 	}
 	return blocks
 }

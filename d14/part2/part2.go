@@ -109,9 +109,6 @@ func main() {
 		a[i] = []byte(line)
 	}
 
-	fmt.Printf("input\n")
-	PrintByteMatrix(a)
-
 	const maxCycles = 1000000000
 	cycleCount := 0
 	cache := map[string]int{}
@@ -129,12 +126,6 @@ func main() {
 
 		spinCycle()
 
-		if cycleCount&0xFFFF == 0xFFFF {
-			fmt.Printf("at cycle %d\n", cycleCount)
-			PrintByteMatrix(a)
-			fmt.Printf("\n")
-		}
-
 		sb := &strings.Builder{}
 		PrintByteMatrixTo(sb, a)
 		asString := sb.String()
@@ -148,6 +139,7 @@ func main() {
 	}
 
 	remaining := (maxCycles - cycleCount) % cycleLength
+	fmt.Printf("%d cycles remain, skipping %d\n", remaining, maxCycles-remaining-cycleCount)
 
 	// now, we have probably seen these cycles before too, but we'll
 	// just step through until we've done the right number, it's easier

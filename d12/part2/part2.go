@@ -124,10 +124,15 @@ func processWithoutCaching(s string, seq []int) int {
 }
 
 func main() {
-	lines, err := argv.ReadChompAll()
-	if err != nil {
-		log.Fatalf("can't read input: %v", err)
-	}
+	lines := make(chan string, 100)
+	errs := make(chan error, 1)
+
+	argv.ReadToChannels(lines, errs)
+
+	go func() {
+		err := <-errs
+		log.Printf("error on input: %v", err)
+	}()
 
 	type lineAndNumber struct {
 		line   string
@@ -135,6 +140,16 @@ func main() {
 	}
 
 	lineChannel := make(chan lineAndNumber, 100)
+
+	go func() {
+		i := 0
+		for line := range lines {
+			lineChannel <- lineAndNumber{line, i}
+			i++
+		}
+		close(lineChannel)
+	}()
+
 	subtotalChannel := make(chan int, 100)
 
 	go func() {
@@ -166,13 +181,6 @@ func main() {
 		}
 		wg.Wait()
 		close(subtotalChannel)
-	}()
-
-	go func() {
-		for i, line := range lines {
-			lineChannel <- lineAndNumber{line, i}
-		}
-		close(lineChannel)
 	}()
 
 	total := 0

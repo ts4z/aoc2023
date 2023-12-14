@@ -11,6 +11,29 @@ import (
 	"github.com/ts4z/aoc2023/ick"
 )
 
+func ReadToChannels(lines chan<- string, errs chan<- error) {
+	r := bufio.NewReader(Reader(func(filename string, err error) {
+		errs <- fmt.Errorf("error reading %q: %w", filename, err)
+	}))
+
+	defer close(lines)
+	defer close(errs)
+
+	for {
+		line, err := r.ReadString('\n')
+		if err == nil {
+			lines <- line
+		} else {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			errs <- err
+			break
+		}
+	}
+
+}
+
 // ReadAll is the moral equivalent of using <ARGV> in a list context in perl.
 //
 // This should be changed to read _any_ Reader into a []string.
@@ -92,6 +115,6 @@ func Reader(onError func(filename string, err error)) io.Reader {
 
 func ReaderLoggingErrors() io.Reader {
 	return Reader(func(filename string, err error) {
-		log.Printf("error opening file %q: %v", filename, err)
+		log.Printf("error handling file %q: %v", filename, err)
 	})
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"sort"
-	"strconv"
 
 	"github.com/ts4z/aoc2023/argv"
 	"github.com/ts4z/aoc2023/d7/ccw"
@@ -20,7 +19,7 @@ func main() {
 	total := 0
 	for i, line := range lines {
 		rank := i + 1
-		bid := ick.Must(strconv.Atoi(line[6:]))
+		bid := ick.Atoi(line[6:])
 		winnings := rank * bid
 		total += winnings
 		log.Printf("rank=%d line=%q bid=%d winnings=%d", rank, line, bid, winnings)

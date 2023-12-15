@@ -162,7 +162,7 @@ func main() {
 					line := input.line
 					parts := strings.Split(line, " ")
 					seqs := ick.MapSlice(func(n string) int {
-						return ick.Must(strconv.Atoi(n))
+						return ick.Atoi(n)
 					}, strings.Split(parts[1], ","))
 					s5 := parts[0] + "?" + parts[0] + "?" + parts[0] + "?" + parts[0] + "?" + parts[0]
 					seq5 := []int{}

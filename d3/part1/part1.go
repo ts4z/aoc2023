@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	lines := ick.Must(argv.ReadChompAll())
+	lines, _ := argv.ReadChompAll()
 	lineLen := len(lines[0])
 
 	for i, line := range lines {

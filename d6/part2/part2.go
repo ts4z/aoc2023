@@ -3,16 +3,11 @@ package main
 import (
 	"log"
 	"regexp"
-	"strconv"
 	"unicode"
 
 	"github.com/ts4z/aoc2023/argv"
 	"github.com/ts4z/aoc2023/ick"
 )
-
-func mustAtoi(s string) int {
-	return ick.Must(strconv.Atoi(s))
-}
 
 var spaceRE = regexp.MustCompile("\\s+")
 
@@ -24,7 +19,7 @@ func parseNumbers(s string) []int {
 		}
 	}
 
-	return []int{ick.Must(strconv.Atoi(n))}
+	return []int{ick.Atoi(n)}
 }
 
 func main() {

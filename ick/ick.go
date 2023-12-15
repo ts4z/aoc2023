@@ -13,6 +13,7 @@ import (
 	"log" // all kids love log
 	"math/rand"
 	"sort"
+	"strconv"
 
 	"golang.org/x/exp/constraints"
 )
@@ -95,13 +96,6 @@ func ReadBlankLineSeparatedBlocks(reader io.Reader) ([][]string, error) {
 		results = append(results, result)
 	}
 	return results, nil
-}
-
-// Mustnt is a logging substitute for panic.
-func Mustnt(err error) {
-	if err != nil {
-		log.Fatalf("Mustnt: encountered error: %v", err)
-	}
 }
 
 // Must extracts the value from a two-argument return and dies if there's an
@@ -222,4 +216,12 @@ func Shuffle[T any](t []T) {
 	rand.Shuffle(len(t), func(i, j int) {
 		t[i], t[j] = t[j], t[i]
 	})
+}
+
+func Atoi(s string) int {
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		log.Fatalf("can't strconv.Atoi(%q): %v", s, err)
+	}
+	return n
 }

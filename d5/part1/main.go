@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/ts4z/aoc2023/argv"
@@ -90,9 +89,7 @@ func loadInput() (*InputFile, error) {
 		return nil, lpc.Wrap("reading seeds", errors.New("bad seeds prefix"))
 	}
 
-	r.Seeds = ick.MapSlice(func(s string) int {
-		return ick.Must(strconv.Atoi(s))
-	}, strings.Split(lpc.Current()[7:], " "))
+	r.Seeds = ick.MapSlice(ick.Atoi, strings.Split(lpc.Current()[7:], " "))
 
 	lpc.Next()
 	lpc.EatBlankLine()

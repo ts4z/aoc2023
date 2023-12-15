@@ -3,20 +3,15 @@ package main
 import (
 	"log"
 	"regexp"
-	"strconv"
 
 	"github.com/ts4z/aoc2023/argv"
 	"github.com/ts4z/aoc2023/ick"
 )
 
-func mustAtoi(s string) int {
-	return ick.Must(strconv.Atoi(s))
-}
-
 var spaceRE = regexp.MustCompile("\\s+")
 
 func parseNumbers(s string) []int {
-	return ick.MapSlice(mustAtoi, ick.Grep(ick.Not(ick.IsEmptyString), spaceRE.Split(s, -1)))
+	return ick.MapSlice(ick.Atoi, ick.Grep(ick.Not(ick.IsEmptyString), spaceRE.Split(s, -1)))
 }
 
 func main() {

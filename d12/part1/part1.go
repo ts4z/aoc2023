@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/ts4z/aoc2023/argv"
@@ -104,9 +103,7 @@ func main() {
 	total := 0
 	for _, line := range lines {
 		parts := strings.Split(line, " ")
-		seqs := ick.MapSlice(func(n string) int {
-			return ick.Must(strconv.Atoi(n))
-		}, strings.Split(parts[1], ","))
+		seqs := ick.MapSlice(ick.Atoi, strings.Split(parts[1], ","))
 		sub := process(parts[0], seqs)
 		fmt.Printf("process %q %+v => %d\n", parts[0], seqs, sub)
 		total += sub

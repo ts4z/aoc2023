@@ -25,7 +25,7 @@ func parseInt(s string) *int {
 	if len(s) == 0 {
 		return nil
 	} else {
-		v := ick.Must(strconv.Atoi(s))
+		v, _ := strconv.Atoi(s)
 		return &v
 	}
 }

@@ -31,6 +31,17 @@ func Sum[V Numeric](av []V) V {
 	return s
 }
 
+func Max[V Numeric](av []V) V {
+	var m V
+	m = av[0]
+	for _, v := range av {
+		if v > m {
+			m = v
+		}
+	}
+	return m
+}
+
 // Sort sorts the data in place.  (This should be renamed QSort?)
 func Sort[V constraints.Ordered](av []V) {
 	sort.Slice(av, func(i, j int) bool { return av[i] < av[j] })

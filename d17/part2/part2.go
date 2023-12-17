@@ -17,6 +17,7 @@ type Position struct {
 	Previous      *Position
 }
 
+// Priority is provided for the priority queue implementation.
 func (pos Position) Priority() int {
 	return pos.CostToGetHere
 }
@@ -78,7 +79,9 @@ func CheckBounds[T any](a [][]T, pos Position) bool {
 	return true // ok
 }
 
-func process(a [][]int) int {
+// I think this is an inelegant case of Dijkstra's algorithm, but unlike my
+// other 3AM AoC hacks, this one isn't completely terrible.
+func process(a [][]int) (int, bool) {
 
 	todo := pq.New[*Position]()
 	didIt := map[string]struct{}{}
@@ -127,7 +130,7 @@ func process(a [][]int) int {
 				for cur := pos; cur != nil; cur = cur.Previous {
 					log.Printf("  %v", cur.String())
 				}
-				return pos.CostToGetHere
+				return pos.CostToGetHere, true
 			}
 
 			for _, dir := range pos.LastDirection.NextDirections {
@@ -160,13 +163,7 @@ func process(a [][]int) int {
 	}
 
 	fmt.Printf("no answer found!\n")
-	return -1
-}
-
-type PriorityInt int
-
-func (pi PriorityInt) Priority() int {
-	return int(pi)
+	return 0, false
 }
 
 func main() {
@@ -180,7 +177,9 @@ func main() {
 		}
 	}
 
-	v := process(a)
-
-	fmt.Printf("%d\n", v)
+	if v, ok := process(a); ok {
+		fmt.Printf("%d\n", v)
+	} else {
+		log.Printf("no answer found")
+	}
 }

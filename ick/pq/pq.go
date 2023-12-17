@@ -1,5 +1,9 @@
 package pq
 
+// package pq provides a non-intrusive priority queue.  Unlike other code in
+// ick, something like this should be in the standard library (and is lacking
+// because generics are so new).
+
 import (
 	"container/heap"
 )

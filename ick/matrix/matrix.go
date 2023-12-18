@@ -4,6 +4,8 @@ package matrix
 // array of array of slices allegedly representing a matrix.  It can do things
 // like make sure the array is properly rectangular (it doesn't) and invert the
 // matrix (it doesn't do that either).  (Maybe someday.)
+//
+// (This is a hodgepodge of poorly named hacks related to handling AoC data.)
 
 import (
 	"fmt"
@@ -145,9 +147,28 @@ const (
 
 type Direction int
 
+func (d Direction) String() string {
+	switch d {
+	case -1:
+		return "Up"
+	case 1:
+		return "Down"
+	case -2:
+		return "Left"
+	case 2:
+		return "Right"
+	default:
+		return "unknown"
+	}
+}
+
 type RelativeAddress struct {
 	Direction Direction
 	Amount    int
+}
+
+func (ra RelativeAddress) String() string {
+	return fmt.Sprintf("RelativeAddress{%s, %d}", ra.Direction.String(), ra.Amount)
 }
 
 func (m RelativeAddress) Negate() RelativeAddress {

@@ -48,55 +48,6 @@ func parseInput() []InputLine {
 	return ils
 }
 
-func FindDimensions(ils []InputLine) (bottomRight matrix.Address, start matrix.Address) {
-	// note: named return
-
-	lowestRow := 0
-	lowestColumn := 0
-	highestRow := 0
-	highestColumn := 0
-
-	pos := matrix.Address{}
-	for _, il := range ils {
-		// was := pos
-		pos = pos.Go(il.RelativeAddress)
-		// log.Printf("from %s to %s, il=%+v", was, pos, il)
-		if pos.Row < lowestRow {
-			lowestRow = pos.Row
-		}
-		if pos.Column < lowestColumn {
-			lowestColumn = pos.Column
-		}
-		if pos.Row > highestRow {
-			highestRow = pos.Row
-		}
-		if pos.Column > highestColumn {
-			highestColumn = pos.Column
-		}
-	}
-
-	log.Printf("cols %d %d rows %d %d", lowestRow, highestRow, lowestColumn, highestColumn)
-
-	finalAddress := pos
-	log.Printf("finished at %v", finalAddress)
-	bottomRight = matrix.Address{Row: highestRow - lowestRow, Column: highestColumn - lowestColumn}
-
-	// start from a position that means we'll never go below 0,0 in the new 0,0
-	// based matrix
-	start = matrix.Address{Row: -lowestRow, Column: -lowestColumn}
-	return // note: named return
-}
-
-type horizontalEdge struct {
-	fromColumn int // inclusive
-	toColumn   int // inclusive
-}
-
-type verticalEdge struct {
-	fromRow int // inclusive
-	toRow   int // inclusive
-}
-
 // https://en.wikipedia.org/wiki/Shoelace_formula
 func shoelace(points []matrix.Address) int {
 	area2 := 0
@@ -112,8 +63,6 @@ func shoelace(points []matrix.Address) int {
 
 func main() {
 	ils := parseInput()
-	bottomRight, start := FindDimensions(ils)
-	log.Printf("bottomRight=%s start=%s", bottomRight.String(), start.String())
 
 	perimeter := 0
 	points := []matrix.Address{}

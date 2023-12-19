@@ -35,8 +35,9 @@ func (c Condition) Invert() Condition {
 		nc.Op = '<'
 		nc.Value = c.Value + 1
 	}
+	// Nothing looks at the action in an inverted rule here, but hide it in
+	// debug output or it's confusing to me.
 	nc.Action = "(inverted)"
-	log.Printf("      invert %v to %v", c, nc)
 	return nc
 }
 
@@ -99,22 +100,20 @@ func parseInput(lines []string) map[string]*Rule {
 	return rules
 }
 
-// Cover up for some sins of data sharing.
+// Cover up for some sins of data sharing.  This is especially problematic
+// because of the many different accesses (including a channel-based consumer)
+// to the working slice that happen in processTree.  Even if the channel is
+// removed and we return a collected slice, some stomping still happens without
+// some defensive copies.
 func clone[T any](in []T) []T {
 	out := make([]T, len(in))
 	copy(out, in)
 	return out
 }
 
-// This initially returned a result via a channel, but there's too much data
-// sharing and subtle modifications in slightly bad ways; the problems are
-// still here, but covered up well enough for consistent results.  (For a good time
-// on a very dull Saturday night, convert this to pass its results to a channel.)
-func processTree(rules map[string]*Rule) [][]Condition {
-	accepts := [][]Condition{}
+func processTree(rules map[string]*Rule, accepts chan []Condition) {
 
 	var recur func(prereqs []Condition, currentRule string)
-
 	recur = func(prereqs []Condition, currentRule string) {
 		rule := rules[currentRule]
 
@@ -123,8 +122,8 @@ func processTree(rules map[string]*Rule) [][]Condition {
 				// terminal dead branch
 			} else if cond.Action == "A" {
 				// If this rule is included, this is an accept.
-				log.Printf("accept %v + %v", prereqs, cond)
-				accepts = append(accepts, clone(append(prereqs, cond)))
+				// log.Printf("accept %v + %v", prereqs, cond)
+				accepts <- append(clone(prereqs), cond)
 			} else {
 				// Recurse for things that match this rule.
 				recur(append(prereqs, cond), cond.Action)
@@ -137,18 +136,16 @@ func processTree(rules map[string]*Rule) [][]Condition {
 
 		def := rule.DefaultAction
 		if def == "R" {
-			log.Printf("default action rejects things that match: %v", prereqs)
+			// log.Printf("default action rejects things that match: %v", prereqs)
 			// done, dead branch
 		} else if def == "A" {
-			accepts = append(accepts, clone(prereqs))
+			accepts <- clone(prereqs)
 		} else {
 			recur(prereqs, def)
 		}
 	}
 
 	recur([]Condition{}, "in")
-
-	return accepts
 }
 
 func main() {
@@ -159,11 +156,18 @@ func main() {
 		log.Printf("rule %q: %+v", name, rule)
 	}
 
-	accepts := processTree(rules)
+	accepts := make(chan []Condition, 100)
 
+	go func() {
+		processTree(rules, accepts)
+		close(accepts)
+	}()
+
+	na := 0
 	total := 0
-	for na, reqs := range accepts {
+	for reqs := range accepts {
 		log.Printf("na=%d matching %+v", na, reqs)
+		na++
 		gt := map[string]int{"x": 0, "m": 0, "a": 0, "s": 0}
 		lt := map[string]int{"x": 4001, "m": 4001, "a": 4001, "s": 4001}
 
@@ -171,10 +175,8 @@ func main() {
 			log.Printf("  i=%d %+v", i, c.String())
 			if c.Op == '<' {
 				lt[c.Attribute] = min(lt[c.Attribute], c.Value)
-				log.Printf("    %s < %d", c.Attribute, lt[c.Attribute])
 			} else if c.Op == '>' {
 				gt[c.Attribute] = max(gt[c.Attribute], c.Value)
-				log.Printf("    %s > %d", c.Attribute, gt[c.Attribute])
 			}
 		}
 

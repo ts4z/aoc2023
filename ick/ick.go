@@ -31,6 +31,15 @@ func Sum[V Numeric](av []V) V {
 	return s
 }
 
+// https://go.dev/doc/tutorial/generics
+func Product[V Numeric](av []V) V {
+	var s V = 1
+	for _, v := range av {
+		s *= v
+	}
+	return s
+}
+
 func Max[V Numeric](av []V) V {
 	var m V
 	m = av[0]

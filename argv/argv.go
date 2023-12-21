@@ -3,6 +3,7 @@ package argv
 import (
 	"bufio"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -89,14 +90,15 @@ func ReadChompAll() ([]string, error) {
 // ARGV filehandle.  It inhales all of the data from the command-line named
 // files, or if there aren't any, it consumes os.Stdin.
 func Reader(onError func(filename string, err error)) io.Reader {
-	if len(os.Args) == 1 {
+
+	if flag.NArg() == 0 {
 		return os.Stdin
 	}
 
 	r, writer := io.Pipe()
 
 	go func() {
-		for _, filename := range os.Args[1:] {
+		for _, filename := range flag.Args() {
 			if reader, err := os.Open(filename); err != nil {
 				onError(filename, err)
 			} else {
